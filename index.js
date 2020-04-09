@@ -1,0 +1,66 @@
+const Blaze = require('blaze-to-jsx');
+const { compile, extractData } = require('spacebars-to-jsx');
+const fs = require('fs');
+const glob = require('glob');
+const shell = require('shelljs');
+const { preprocess } = require('@glimmer/syntax');
+
+
+const INPUT_DIR = process.argv[2];
+const OUTPUT_DIR = process.argv[3];
+
+var getDirectories = function (src, callback) {
+  glob(src + '/**/*', callback);
+};
+
+async function convert(template) {
+  const baseComponent = __dirname + "/blaze-AST/src/ReactAST.js";
+  const baseComponentContent = fs.readFileSync(baseComponent);
+  console.log(`Converting template ${template}`);
+  console.log(`  Parsing ${template}.html`);
+  const htmlContent = fs.readFileSync(template+".html");
+  const spacebarProgram = preprocess(htmlContent.toString());
+  const disambiguiationDict = extractData(spacebarProgram);
+  const jsx = compile(spacebarProgram, {isJSX: true});
+  console.log(`  Parsing ${template}.js`);
+  const jsContent = fs.readFileSync(template+".js");
+  const AST = new Blaze.default.AST(jsContent.toString());
+  const converter = new Blaze.default.Converter(
+    baseComponentContent.toString(),
+    AST.getComponent(),
+    jsx,
+    ['__'],
+    disambiguiationDict
+  );
+  const result = converter.generate();
+  const output = (OUTPUT_DIR+"/"+template).split('/');
+  const file = output.splice(output.length-1, 1);
+  shell.mkdir('-p', output.join('/'));
+  fs.writeFileSync(output.join('/')+"/"+file+".jsx", result);
+
+}
+
+
+async function run() {
+  if(process.argv.length < 4) {
+    console.error('Usage: input_dir output_dir');
+    return;
+  }
+
+  // retrieves files
+  let files = await new Promise((resolve, reject) => {
+    getDirectories(INPUT_DIR, function (err, res) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(res);
+      }
+    });
+  });
+  // getting all htmls files
+  files = files.filter(f => f.endsWith(".html"));
+  files = [files[0]];
+  files.forEach(f => convert(f.replace('.html', '')));
+};
+
+run();

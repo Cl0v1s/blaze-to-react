@@ -1,0 +1,49 @@
+<!-- Template parameters :
+    @param { Object } entity
+    @param { function } onRemove
+    @param { Array } alternativesForDrug
+    @param { Boolean } isLoadingAlternatives
+    @param { Array } icons liste des icons à afficher devant le nom de l'entité (html)
+ -->
+<template name="drugRow">
+  <div class="component-drugRow rounded">
+    <div class="container-fluid h-100">
+      <div class="row align-items-center p-0 h-100">
+
+        <div class="col p-2 {{#if isShowRcpButton (isMobile entity)}} name{{/if}}">
+          {{#each icon in icons}}
+            {{{icon}}}
+          {{/each}}
+          {{#if hasAlternatives}}
+            <button class="btn alternativesWarning px-3 m-2" data-uuid={{entity.uuid}}>
+                <i class="fa fa-exchange"></i>
+            </button>
+          {{/if}}
+          {{#if isLoadingAlternatives}}<i class="fa fa-spinner fa-spin m-0 p-2"></i>{{/if}}
+          <span class="align-middle d-inline-block">
+            {{> drugLabelElement therapeuticEntity=entity truncate=false  showBadge=false}}
+          </span>
+        </div>
+
+        <div class="col-auto p-2 h-100 text-right">
+          {{#if isShowRcpButton entity}}
+          <span class="mr-3 {{#unless isMobile}} shrink {{/unless}} menu-item rcp" data-uuid={{entity.uuid}}>
+            <i class="fa fa-book" style="cursor: pointer;"></i>
+            {{#if isPatient}}{{__ "dr-card-text"}}{{else}}{{__ "dr-rcp"}}{{/if}}
+          </span>
+          {{else}}
+          <span class="mr-3 menu-item invisible">
+            <i class="fa fa-book" data-uuid={{entity.uuid}}></i>
+            {{#if isPatient}}{{__ "dr-card-text"}}{{else}}{{ __ "dr-rcp" }} {{/if}}
+          </span>
+          {{/if}}
+          <span class="pl-3 mr-2 remove {{#unless isMobile}} shrink {{/unless}} menu-item" data-uuid={{entity.uuid}}>
+            <i class="fa fa-trash" style="cursor: pointer;"></i>
+          <span>{{#if isUs}}&nbsp;{{/if}}{{__ "dr-remove-cut-text"}}{{#if isUs}}&nbsp;{{/if}}</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</template>
