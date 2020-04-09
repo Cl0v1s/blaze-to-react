@@ -9,6 +9,9 @@ const { preprocess } = require('@synapse-medicine/syntax');
 const INPUT_DIR = process.argv[2];
 const OUTPUT_DIR = process.argv[3];
 
+let failed = 0;
+let ok = 0;
+
 var getDirectories = function (src, callback) {
   glob(src + '/**/*', callback);
 };
@@ -18,25 +21,34 @@ async function convert(template) {
   const baseComponentContent = fs.readFileSync(baseComponent);
   console.log(`Converting template ${template}`);
   console.log(`  Parsing ${template}.html`);
-  const htmlContent = fs.readFileSync(template+".html");
-  const spacebarProgram = preprocess(htmlContent.toString());
-  const disambiguiationDict = extractData(spacebarProgram);
-  const jsx = compile(spacebarProgram, {isJSX: true});
-  console.log(`  Parsing ${template}.js`);
-  const jsContent = fs.readFileSync(template+".js");
-  const AST = new Blaze.default.AST(jsContent.toString());
-  const converter = new Blaze.default.Converter(
-    baseComponentContent.toString(),
-    AST.getComponent(),
-    jsx,
-    ['__'],
-    disambiguiationDict
-  );
-  const result = converter.generate();
+  let result = null;
+  try {
+    const htmlContent = fs.readFileSync(template+".html");
+    const spacebarProgram = preprocess(htmlContent.toString());
+    const disambiguiationDict = extractData(spacebarProgram);
+    const jsx = compile(spacebarProgram, {isJSX: true});
+    console.log(`  Parsing ${template}.js`);
+    const jsContent = fs.readFileSync(template+".js");
+    const AST = new Blaze.default.AST(jsContent.toString());
+    const converter = new Blaze.default.Converter(
+      baseComponentContent.toString(),
+      AST.getComponent(),
+      jsx,
+      ['__'],
+      disambiguiationDict
+    );
+    result = converter.generate();
+  } catch (error) {
+    console.error(`Unable to convert ${template}:`);
+    console.error(error);
+    failed++;
+    return;
+  }
   const output = (OUTPUT_DIR+"/"+template).split('/');
   const file = output.splice(output.length-1, 1);
   shell.mkdir('-p', output.join('/'));
   fs.writeFileSync(output.join('/')+"/"+file+".jsx", result);
+  ok++;
 
 }
 
@@ -60,6 +72,7 @@ async function run() {
   // getting all htmls files
   files = files.filter(f => f.endsWith(".html"));
   files.forEach(f => convert(f.replace('.html', '')));
+  console.log(`Total:${files.length} Ok:${ok} Failed:${failed}`)
 };
 
 run();
