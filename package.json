@@ -18,5 +18,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "publishConfig": {
+    "@synapse-medicine:registry": "https://gitlab.com/api/v4/projects/7004367/packages/npm/"
+  }
 }
