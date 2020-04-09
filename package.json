@@ -8,8 +8,8 @@
   },
   "dependencies": {
     "@babel/generator": "^7.9.5",
-    "@synapse-medicine/blaze-to-jsx": "0.0.2",
-    "@synapse-medicine/spacebars-to-jsx": "0.0.2",
+    "@synapse-medicine/blaze-to-jsx": "0.0.7",
+    "@synapse-medicine/spacebars-to-jsx": "0.0.3",
     "@synapse-medicine/syntax": "^0.38.4",
     "glob": "^7.1.6",
     "shelljs": "^0.8.3"
