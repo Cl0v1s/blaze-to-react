@@ -1,9 +1,9 @@
-const Blaze = require('blaze-to-jsx');
-const { compile, extractData } = require('spacebars-to-jsx');
+const Blaze = require('@synapse-medicine/blaze-to-jsx');
+const { compile, extractData } = require('@synapse-medicine/spacebars-to-jsx');
 const fs = require('fs');
 const glob = require('glob');
 const shell = require('shelljs');
-const { preprocess } = require('@glimmer/syntax');
+const { preprocess } = require('@synapse-medicine/syntax');
 
 
 const INPUT_DIR = process.argv[2];
@@ -14,7 +14,7 @@ var getDirectories = function (src, callback) {
 };
 
 async function convert(template) {
-  const baseComponent = __dirname + "/blaze-AST/src/ReactAST.js";
+  const baseComponent = __dirname + "/node_modules/@synapse-medicine/blaze-to-jsx/src/ReactAST.js";
   const baseComponentContent = fs.readFileSync(baseComponent);
   console.log(`Converting template ${template}`);
   console.log(`  Parsing ${template}.html`);
@@ -59,7 +59,6 @@ async function run() {
   });
   // getting all htmls files
   files = files.filter(f => f.endsWith(".html"));
-  files = [files[0]];
   files.forEach(f => convert(f.replace('.html', '')));
 };
 

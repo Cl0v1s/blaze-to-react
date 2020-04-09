@@ -1,17 +1,17 @@
 {
-  "name": "blaze-to-react",
-  "version": "1.0.0",
+  "name": "@synapse-medicine/blaze-to-react",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "directories": {
     "test": "tests"
   },
   "dependencies": {
-    "@glimmer/syntax": "file:../glimmer-vm/dist/@glimmer/syntax",
-    "blaze-to-jsx": "file:../blaze-to-jsx",
+    "@synapse-medicine/blaze-to-jsx": "0.0.1",
+    "@synapse-medicine/spacebars-to-jsx": "0.0.1",
+    "@synapse-medicine/syntax": "^0.38.4",
     "glob": "^7.1.6",
-    "shelljs": "^0.8.3",
-    "spacebars-to-jsx": "file:../spacebars-to-jsx"
+    "shelljs": "^0.8.3"
   },
   "devDependencies": {},
   "scripts": {
