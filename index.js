@@ -4,12 +4,30 @@ const fs = require('fs');
 const glob = require('glob');
 const shell = require('shelljs');
 const { preprocess } = require('@synapse-medicine/syntax');
+require('colors');
+
+
+const GLOBAL_IDENTIFIERS = [
+  '__',
+  'Boolean',
+  'map',
+];
 
 
 const INPUT_DIR = process.argv[2];
 const OUTPUT_DIR = process.argv[3];
+const OPTIONS = process.argv.concat([]);
+OPTIONS.splice(0, 4);
 
-let failed = 0;
+
+const errorLog = message => console.error(message.red);
+const warn = message => console.warn(message.yellow);
+const log = message => {
+  if(OPTIONS.indexOf('--only-errors') !== -1) return;
+  console.log(message);
+}
+
+let failed = [];
 let ok = 0;
 
 var getDirectories = function (src, callback) {
@@ -19,29 +37,29 @@ var getDirectories = function (src, callback) {
 async function convert(template) {
   const baseComponent = __dirname + "/node_modules/@synapse-medicine/blaze-to-jsx/src/ReactAST.js";
   const baseComponentContent = fs.readFileSync(baseComponent);
-  console.log(`Converting template ${template}`);
-  console.log(`  Parsing ${template}.html`);
+  log(`Converting template ${template}`);
+  log(`  Parsing ${template}.html`);
   let result = null;
   try {
     const htmlContent = fs.readFileSync(template+".html");
     const spacebarProgram = preprocess(htmlContent.toString());
     const disambiguiationDict = extractData(spacebarProgram);
     const jsx = compile(spacebarProgram, {isJSX: true});
-    console.log(`  Parsing ${template}.js`);
+    log(`  Parsing ${template}.js`);
     const jsContent = fs.readFileSync(template+".js");
     const AST = new Blaze.default.AST(jsContent.toString());
     const converter = new Blaze.default.Converter(
       baseComponentContent.toString(),
       AST.getComponent(),
       jsx,
-      ['__'],
+      GLOBAL_IDENTIFIERS,
       disambiguiationDict
     );
     result = converter.generate();
   } catch (error) {
-    console.error(`Unable to convert ${template}:`);
-    console.error(error);
-    failed++;
+    errorLog(`Unable to convert ${template}:`);
+    console.log(error);
+    failed.push(template);
     return;
   }
   const output = (OUTPUT_DIR+"/"+template).split('/');
@@ -55,7 +73,7 @@ async function convert(template) {
 
 async function run() {
   if(process.argv.length < 4) {
-    console.error('Usage: input_dir output_dir');
+    errorLog('Usage: input_dir output_dir');
     return;
   }
 
@@ -72,7 +90,9 @@ async function run() {
   // getting all htmls files
   files = files.filter(f => f.endsWith(".html"));
   files.forEach(f => convert(f.replace('.html', '')));
-  console.log(`Total:${files.length} Ok:${ok} Failed:${failed}`)
+  log(`Total:${files.length} Ok:${ok} Failed:${failed.length}`)
+  log('-----------');
+  failed.forEach(f => errorLog(f));
 };
 
 run();
