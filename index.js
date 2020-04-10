@@ -46,8 +46,9 @@ async function convert(template) {
     const disambiguiationDict = extractData(spacebarProgram);
     const jsx = compile(spacebarProgram, {isJSX: true});
     log(`  Parsing ${template}.js`);
-    const jsContent = fs.readFileSync(template+".js");
-    const AST = new Blaze.default.AST(jsContent.toString());
+    let jsContent = "";
+    if(fs.existsSync(template+".js")) jsContent = fs.readFileSync(template+".js").toString();
+    const AST = new Blaze.default.AST(jsContent);
     const converter = new Blaze.default.Converter(
       baseComponentContent.toString(),
       AST.getComponent(),
@@ -59,7 +60,7 @@ async function convert(template) {
   } catch (error) {
     errorLog(`Unable to convert ${template}:`);
     console.log(error);
-    failed.push(template);
+    failed.push(template+" "+error.message);
     return;
   }
   const output = (OUTPUT_DIR+"/"+template).split('/');
@@ -90,9 +91,14 @@ async function run() {
   // getting all htmls files
   files = files.filter(f => f.endsWith(".html"));
   files.forEach(f => convert(f.replace('.html', '')));
-  log(`Total:${files.length} Ok:${ok} Failed:${failed.length}`)
-  log('-----------');
-  failed.forEach(f => errorLog(f));
+  warn(`Total:${files.length} Ok:${ok} Failed:${failed.length}`)
+  warn('-----------');
+  failed.forEach(f => {
+    errorLog(f);
+    console.log("-----");
+    console.log("=====");
+
+  });
 };
 
 run();

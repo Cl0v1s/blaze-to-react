@@ -21,8 +21,9 @@ async function convert(template) {
     const disambiguiationDict = extractData(spacebarProgram);
     const jsx = compile(spacebarProgram, {isJSX: true});
     //console.log(`  Parsing ${template}.js`);
-    const jsContent = fs.readFileSync(template+".js");
-    const AST = new Blaze.default.AST(jsContent.toString());
+    let jsContent = "";
+    if(fs.existsSync(template+".js")) jsContent = fs.readFileSync(template+".js").toString();
+    const AST = new Blaze.default.AST(jsContent);
     console.log(JSON.stringify(AST, null, 2));
     if(OPTIONS.indexOf('--only-ast') !== -1) return;
     console.log('------');
@@ -37,7 +38,6 @@ async function convert(template) {
   } catch (error) {
     console.error(`Unable to convert ${template}:`);
     console.error(error);
-    failed++;
     return;
   }
   console.log(result);
