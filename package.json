@@ -13,7 +13,7 @@
     "@synapse-medicine/syntax": "^0.38.4",
     "colors": "^1.4.0",
     "glob": "^7.1.6",
-    "shelljs": "^0.8.3"
+    "shelljs": "^0.8.5"
   },
   "devDependencies": {},
   "scripts": {
